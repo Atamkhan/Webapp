@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poll Voting Page</title>
+  <style>
+    body {
+      background-image: url('background.jpg');
+      background-size: cover;
+      color: white;
+      font-size: large;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 style="color: white; text-align: center; padding-top: 150px;">Poll: Premier League Winner</h1>
+  <p style="color: white;">Question: Who will win the Premier League?</p>
+
+  <form id="votingForm">
+    <fieldset>
+      <legend>Select an option:</legend>
+
+    </fieldset>
+    <button type="button" onclick="submitVote()">Submit Vote</button>
+  </form>
+
+  <script>
+
+    const poll = {
+      "pollId": 1,
+      "pollName": "Premier League Winner",
+      "question": "Who will win the Premier League?",
+      "options": [
+        {
+          "optionId": 1,
+          "optionText": "Manchester City"
+        },
+        {
+          "optionId": 2,
+          "optionText": "Arsenal"
+        },
+        {
+          "optionId": 3,
+          "optionText": "Liverpool"
+        }
+      ]
+    };
+
+    const form = document.getElementById('votingForm');
+    const fieldset = form.querySelector('fieldset');
+
+    poll.options.forEach(option => {
+      const radioBtn = document.createElement('input');
+      radioBtn.type = 'radio';
+      radioBtn.name = 'votingOption';
+      radioBtn.value = option.optionId;
+      radioBtn.id = `option${option.optionId}`;
+
+      const label = document.createElement('label');
+      label.htmlFor = `option${option.optionId}`;
+      label.textContent = option.optionText;
+
+      fieldset.appendChild(radioBtn);
+      fieldset.appendChild(label);
+      fieldset.appendChild(document.createElement('br'));
+    });
+
+    async function submitVote() {
+      const selectedOption = document.querySelector('input[name="votingOption"]:checked');
+
+      if (!selectedOption) {
+        alert('Please select an option before submitting your vote.');
+        return;
+      }
+
+      const pollId = poll.pollId;
+      const optionId = selectedOption.value;
+      console.log('Submitting Vote - Poll ID:', pollId, 'Option ID:', optionId);
+
+      try {
+        const response = await fetch('http://localhost:3000/votes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ pollId, optionId: parseInt(optionId) }),
+        });
+
+        if (response.ok) {
+
+          window.location.href = 'confirmation.html';
+        } else {
+          const errorData = await response.json();
+          alert(`Error: ${errorData.error}`);
+        }
+      } catch (error) {
+        console.error('Error submitting vote:', error);
+        alert('An unexpected error occurred while submitting your vote.');
+      }
+    }
+  </script>
+
+</body>
+
+</html>
